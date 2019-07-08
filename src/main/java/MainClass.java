@@ -7,11 +7,6 @@ public class MainClass {
 
     public static void main(String[] args) {
 
-//            HttpClient newHttpClient = new HttpClient();
-
-//            String hiredTaxi =  newHttpClient.PostHiredTaxi();
- //           System.out.println(hiredTaxi);
-
         ApiContextInitializer.init();
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
         try {

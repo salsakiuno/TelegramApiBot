@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class AvailableBotClass extends TelegramLongPollingBot {
+    //TO DO: separate the logic in order to make it more "testeable"
     UserClass user;
 
     public AvailableBotClass() {
@@ -20,64 +21,67 @@ public class AvailableBotClass extends TelegramLongPollingBot {
         Long chatId = update.getMessage().getChatId();
         SendMessage message = new SendMessage();
 
-        if (update.hasMessage() && update.getMessage().hasText()){
-
-            if (command.equals("/start")){
-                message.setChatId(chatId).setText("Please write your city");
-
+        if (hasMessageToBotReceived(update)){
+            if (messageIsEqualtoSlashGetTaxi(command, "/start")){
+                message.setChatId(chatId).setText("Hello, Please enter your city");
                 try {
                     execute(message);
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
-
-            }else if (update.getMessage().getText().charAt(0) != '/'){
+            }else if (isNotMessageStartedBySlash(update)){
                 String newCity = command.substring(0, 1).toUpperCase()+ command.substring(1);
-
                 String cities[] = {"Madrid", "Barcelona", "Valencia", "Bilbao"};
                 if (Arrays.asList(cities).contains(newCity)){
                     message.setChatId(chatId).setText("Your city is "+ newCity);
 
                 }else {message.setChatId(chatId).setText(newCity + " is not a valid city. Please enter a valid city");}
-
                 user.setCity(newCity);
-
                 try {
                     execute(message);
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
-
-            }else if (command.equals("/gettaxibarcelona")) {
+            }else if (messageIsEqualtoSlashGetTaxi(command, "/getnearesttaxi")) {
                 try {
                     message.setChatId(chatId).setText("The number os taxis near you is: "+taxisBarcelona.numOfTaxis(user.getCity()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 try {
                     execute(message);
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
-            }else if (command.equals("/hiretaxi")) {
-
+            }else if (isCommandEqualsToHireTaxi(command, "/hiretaxi")) {
                 try {
                     message.setChatId(chatId).setText("Congratulations, your taxi is now " + taxisBarcelona.hireTaxi() + ", will be there soon");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 try {
                     execute(message);
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
             }
-
         }
+    }
 
+    private boolean isCommandEqualsToHireTaxi(String command, String s) {
+        return command.equals(s);
+    }
 
+    private boolean messageIsEqualtoSlashGetTaxi(String command, String s) {
+        return command.equals(s);
+    }
+
+    private boolean hasMessageToBotReceived(Update update) {
+        return update.hasMessage() && update.getMessage().hasText();
+    }
+
+    private boolean isNotMessageStartedBySlash(Update update) {
+        return update.getMessage().getText().charAt(0) != '/';
     }
 
     public String getBotUsername() {
